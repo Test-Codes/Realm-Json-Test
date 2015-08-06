@@ -11,8 +11,10 @@ import com.google.gson.GsonBuilder;
 import com.orhanobut.logger.Logger;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.thefinestartist.realm.json.adapters.MoshiDateAdapter;
 import com.thefinestartist.realm.json.models.AllTypes;
 import com.thefinestartist.realm.json.models.AllTypesGen;
+import com.thefinestartist.realm.json.models.Dog;
 import com.thefinestartist.realm.json.serializers.AllTypesSerializer;
 import com.thefinestartist.royal.Rson;
 
@@ -46,10 +48,15 @@ public class MainActivity extends AppCompatActivity {
         allTypes.setColumnBinary(new byte[]{0, 1, 2, 3, 4, 5, 6, 7});
         allTypes.setColumnBoolean(true);
         allTypes.setColumnDate(new Date());
-        allTypes.setColumnDouble(Double.MAX_VALUE);
-        allTypes.setColumnFloat(Float.MAX_VALUE);
-        allTypes.setColumnLong(Long.MAX_VALUE);
+        allTypes.setColumnDouble(1.23d);
+        allTypes.setColumnFloat(12.3f);
+        allTypes.setColumnLong(123);
         allTypes.setColumnString("allType");
+
+        Dog dog = new Dog();
+        dog.setName("Kitty");
+        dog.setAge(1);
+        allTypes.setColumnRealmObject(dog);
 
         tryMoshi(allTypes);
         tryGson(allTypes);
@@ -61,13 +68,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void tryMoshi(AllTypes allTypes) {
         try {
-            final Moshi moshi = new Moshi.Builder().build();
-            final JsonAdapter<AllTypes> adapter = moshi.adapter(AllTypes.class);
+            Moshi moshi = new Moshi.Builder()
+                    .add(new MoshiDateAdapter())
+                    .build();
+            JsonAdapter<AllTypes> adapter = moshi.adapter(AllTypes.class);
 
             Logger.d("Moshi(Realm Object)");
             Logger.json(adapter.toJson(allTypes));
 
-            final AllTypes allTypesProxy;
+            AllTypes allTypesProxy;
 
             realm.beginTransaction();
             {
@@ -78,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
             Logger.d("Moshi(Proxy Object)");
             Logger.json(adapter.toJson(allTypesProxy));
         } catch (Exception e) {
+            e.printStackTrace();
             Logger.e("Moshi: error: " + e.getMessage());
         }
     }
@@ -100,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         Logger.d("Gson(Realm Object)");
         Logger.json(gson.toJson(allTypes));
 
-        final AllTypes allTypesProxy;
+        AllTypes allTypesProxy;
 
         realm.beginTransaction();
         {
@@ -121,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
             Logger.d("JPP(Realm Object)");
             Logger.json(writer.toString());
 
-            final AllTypes allTypesProxy;
+            AllTypes allTypesProxy;
 
             realm.beginTransaction();
             {
@@ -142,12 +152,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void tryJackson(AllTypes allTypes) {
         try {
-            final ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
 
             Logger.d("Jackson(Realm Object)");
             Logger.json(mapper.writeValueAsString(allTypes));
 
-            final AllTypes allTypesProxy;
+            AllTypes allTypesProxy;
 
             realm.beginTransaction();
             {
@@ -164,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void trySerialize(AllTypes allTypes) {
         try {
-            final Gson gson = new GsonBuilder()
+            Gson gson = new GsonBuilder()
                     .setExclusionStrategies(new ExclusionStrategy() {
                         @Override
                         public boolean shouldSkipField(FieldAttributes f) {
@@ -182,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
             Logger.d("Serialize(Realm Object)");
             Logger.json(gson.toJson(allTypes));
 
-            final AllTypes allTypesProxy;
+            AllTypes allTypesProxy;
 
             realm.beginTransaction();
             {

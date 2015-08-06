@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.thefinestartist.realm.json.models.AllTypes;
+import com.thefinestartist.realm.json.utils.DateUtil;
 
 import java.lang.reflect.Type;
 
@@ -22,7 +23,7 @@ public class AllTypesSerializer implements JsonSerializer<AllTypes> {
         jsonObject.addProperty("columnFloat", src.getColumnFloat());
         jsonObject.addProperty("columnDouble", src.getColumnDouble());
         jsonObject.addProperty("columnBoolean", src.isColumnBoolean());
-        jsonObject.addProperty("columnDate", src.getColumnDate().getTime());
+        jsonObject.addProperty("columnDate", DateUtil.getDateFormat(src.getColumnDate()));
         jsonObject.add("columnBinary", context.serialize(src.getColumnBinary()));
         jsonObject.add("columnRealmObject", context.serialize(src.getColumnRealmObject()));
         jsonObject.add("columnRealmList", context.serialize(src.getColumnRealmList()));
